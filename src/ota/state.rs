@@ -141,9 +141,9 @@ where
     C: ControlInterface,
     DP: DataInterface,
     DS: DataInterface,
-    T: timer::CountDown + timer::Cancel,
+    T: timer::nb::CountDown + timer::nb::Cancel,
     T::Time: From<u32>,
-    ST: timer::CountDown + timer::Cancel,
+    ST: timer::nb::CountDown + timer::nb::Cancel,
     ST::Time: From<u32>,
     PAL: OtaPal,
 {
@@ -168,9 +168,9 @@ where
     C: ControlInterface,
     DP: DataInterface,
     DS: DataInterface,
-    T: timer::CountDown + timer::Cancel,
+    T: timer::nb::CountDown + timer::nb::Cancel,
     T::Time: From<u32>,
-    ST: timer::CountDown + timer::Cancel,
+    ST: timer::nb::CountDown + timer::nb::Cancel,
     ST::Time: From<u32>,
     PAL: OtaPal,
 {
@@ -512,7 +512,7 @@ where
 
                 // Stop the request timer
                 self.request_timer
-                    .try_cancel()
+                    .cancel()
                     .map_err(|_| OtaError::Timer)?;
 
                 self.pal.close_file(file_ctx)?;
@@ -550,9 +550,9 @@ where
     C: ControlInterface,
     DP: DataInterface,
     DS: DataInterface,
-    T: timer::CountDown + timer::Cancel,
+    T: timer::nb::CountDown + timer::nb::Cancel,
     T::Time: From<u32>,
-    ST: timer::CountDown + timer::Cancel,
+    ST: timer::nb::CountDown + timer::nb::Cancel,
     ST::Time: From<u32>,
     PAL: OtaPal,
 {
@@ -583,7 +583,7 @@ where
             // Start self-test timer
             if let Some(ref mut self_test_timer) = self.self_test_timer {
                 self_test_timer
-                    .try_start(self.config.self_test_timeout_ms)
+                    .start(self.config.self_test_timeout_ms)
                     .map_err(|_| OtaError::Timer)?;
             }
         }
@@ -610,7 +610,7 @@ where
                 if self.request_momentum < self.config.max_request_momentum {
                     // Start request timer
                     self.request_timer
-                        .try_start(self.config.request_wait_ms)
+                        .start(self.config.request_wait_ms)
                         .map_err(|_| OtaError::Timer)?;
 
                     self.request_momentum += 1;
@@ -618,7 +618,7 @@ where
                 } else {
                     // Stop request timer
                     self.request_timer
-                        .try_cancel()
+                        .cancel()
                         .map_err(|_| OtaError::Timer)?;
 
                     // Send shutdown event to the OTA Agent task
@@ -635,7 +635,7 @@ where
             Ok(_) => {
                 // Stop request timer
                 self.request_timer
-                    .try_cancel()
+                    .cancel()
                     .map_err(|_| OtaError::Timer)?;
 
                 // Reset the request momentum
@@ -653,7 +653,7 @@ where
                 if self.request_momentum < self.config.max_request_momentum {
                     // Start request timer
                     self.request_timer
-                        .try_start(self.config.request_wait_ms)
+                        .start(self.config.request_wait_ms)
                         .map_err(|_| OtaError::Timer)?;
 
                     self.request_momentum += 1;
@@ -661,7 +661,7 @@ where
                 } else {
                     // Stop request timer
                     self.request_timer
-                        .try_cancel()
+                        .cancel()
                         .map_err(|_| OtaError::Timer)?;
 
                     // Send shutdown event to the OTA Agent task
@@ -728,7 +728,7 @@ where
 
             // Stop the self test timer as it is no longer required
             if let Some(ref mut self_test_timer) = self.self_test_timer {
-                self_test_timer.try_cancel().map_err(|_| OtaError::Timer)?;
+                self_test_timer.cancel().map_err(|_| OtaError::Timer)?;
             }
         } else {
             // The job is in self test but the platform image state is not so it
@@ -836,7 +836,7 @@ where
         if file_ctx.blocks_remaining > 0 {
             // Start the request timer
             self.request_timer
-                .try_start(self.config.request_wait_ms)
+                .start(self.config.request_wait_ms)
                 .map_err(|_| OtaError::Timer)?;
 
             if self.request_momentum <= self.config.max_request_momentum {
@@ -850,7 +850,7 @@ where
             } else {
                 // Stop the request timer
                 self.request_timer
-                    .try_cancel()
+                    .cancel()
                     .map_err(|_| OtaError::Timer)?;
 
                 // Failed to send data request abort and close file.
@@ -886,7 +886,7 @@ where
     fn job_notification_handler(&mut self, _data: &JobEventData<'_>) -> Result<(), OtaError> {
         // Stop the request timer
         self.request_timer
-            .try_cancel()
+            .cancel()
             .map_err(|_| OtaError::Timer)?;
 
         // Abort the current job
@@ -968,7 +968,7 @@ where
                 } else {
                     // Start the request timer.
                     self.request_timer
-                        .try_start(self.config.request_wait_ms)
+                        .start(self.config.request_wait_ms)
                         .map_err(|_| OtaError::Timer)?;
 
                     self.events
@@ -1001,7 +1001,7 @@ where
 
                 // Stop the request timer.
                 self.request_timer
-                    .try_cancel()
+                    .cancel()
                     .map_err(|_| OtaError::Timer)?;
 
                 // Send event to close file.

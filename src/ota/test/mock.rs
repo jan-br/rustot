@@ -4,8 +4,8 @@ use crate::ota::{
 };
 
 ///
-/// Mock timer used for unit tests. Implements `embedded_hal::timer::CountDown`
-/// & `embedded_hal::timer::Cancel` traits.
+/// Mock timer used for unit tests. Implements `embedded_hal::timer::nb::CountDown`
+/// & `embedded_hal::timer::nb::Cancel` traits.
 ///
 pub struct MockTimer {
     pub is_started: bool,
@@ -15,7 +15,7 @@ impl MockTimer {
         Self { is_started: false }
     }
 }
-impl embedded_hal::timer::CountDown for MockTimer {
+impl embedded_hal::timer::nb::CountDown for MockTimer {
     type Error = ();
 
     type Time = u32;
@@ -33,7 +33,7 @@ impl embedded_hal::timer::CountDown for MockTimer {
     }
 }
 
-impl embedded_hal::timer::Cancel for MockTimer {
+impl embedded_hal::timer::nb::Cancel for MockTimer {
     fn try_cancel(&mut self) -> Result<(), Self::Error> {
         self.is_started = false;
         Ok(())
